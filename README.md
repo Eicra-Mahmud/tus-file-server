@@ -55,13 +55,13 @@ python manage.py runserver
 ### Run on specific port:
 
 ```bash
-python manage.py runserver 8001
+python manage.py runserver 8000
 ```
 
 ### Run on custom IP + port:
 
 ```bash
-python manage.py runserver 0.0.0.0:8001
+python manage.py runserver 0.0.0.0:8000
 ```
 
 ---
