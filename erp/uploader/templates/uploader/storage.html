@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tus Storage Monitor</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f6f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .card {
+            width: 420px;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 28px;
+            color: #333;
+        }
+
+        .chart-container {
+            width: 260px;
+            height: 260px;
+            margin: auto;
+            position: relative;
+        }
+
+        .center-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .center-text h2 {
+            font-size: 34px;
+            color: #111;
+        }
+
+        .center-text p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .info {
+            margin-top: 25px;
+            text-align: left;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding: 10px;
+            background: #f7f7f7;
+            border-radius: 10px;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .value {
+            color: #111;
+        }
+
+        .refresh-btn {
+            margin-top: 20px;
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: #2563eb;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .refresh-btn:hover {
+            background: #1d4ed8;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>Tus Storage Monitor</h1>
+
+    <div class="chart-container">
+        <canvas id="storageChart"></canvas>
+
+        <div class="center-text">
+            <h2 id="usagePercent">0%</h2>
+            <p>Used</p>
+        </div>
+    </div>
+
+    <div class="info">
+        <div class="info-item">
+            <span class="label">Total Space</span>
+            <span class="value" id="totalSpace">0 GB</span>
+        </div>
+
+        <div class="info-item">
+            <span class="label">Used Space</span>
+            <span class="value" id="usedSpace">0 GB</span>
+        </div>
+
+        <div class="info-item">
+            <span class="label">Free Space</span>
+            <span class="value" id="freeSpace">0 GB</span>
+        </div>
+    </div>
+
+    <button class="refresh-btn" onclick="loadStorage()">Refresh</button>
+</div>
+
+<script>
+    let storageChart;
+
+function bytesToGB(bytes) {
+    return (bytes / 1024 / 1024 / 1024).toFixed(2);
+}
+
+function loadStorage() {
+    try {
+        const xhr = new XMLHttpRequest();
+
+        xhr.open("GET", "https://btv-storage.nexdecade.com/api/storage", true);
+
+        // 🔐 JWT HEADER
+        const token = localStorage.getItem("token");
+        if (token) {
+            xhr.setRequestHeader("Authorization", "Bearer " + token);
+        }
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+
+                if (xhr.status !== 200) {
+                    console.error("API error:", xhr.status, xhr.responseText);
+                    alert("API error: " + xhr.status);
+                    return;
+                }
+
+                try {
+                    const data = JSON.parse(xhr.responseText);
+
+                    const total = data.total_bytes || 0;
+                    const used = data.used_bytes || 0;
+                    const free = data.free_bytes || 0;
+
+                    if (total === 0) {
+                        throw new Error("Invalid storage data");
+                    }
+
+                    const usagePercent = ((used / total) * 100).toFixed(1);
+
+                    document.getElementById("usagePercent").innerText = usagePercent + "%";
+                    document.getElementById("totalSpace").innerText = bytesToGB(total) + " GB";
+                    document.getElementById("usedSpace").innerText = bytesToGB(used) + " GB";
+                    document.getElementById("freeSpace").innerText = bytesToGB(free) + " GB";
+
+                    // destroy previous chart safely
+                    if (storageChart) {
+                        storageChart.destroy();
+                    }
+
+                    const ctx = document.getElementById("storageChart");
+
+                    if (!ctx) return;
+
+                    storageChart = new Chart(ctx, {
+                        type: "doughnut",
+                        data: {
+                            labels: ["Used", "Free"],
+                            datasets: [{
+                                data: [used, free],
+                                backgroundColor: ["#ef4444", "#22c55e"],
+                                borderWidth: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            cutout: "75%",
+                            plugins: {
+                                legend: {
+                                    position: "bottom"
+                                }
+                            }
+                        }
+                    });
+
+                } catch (e) {
+                    console.error("JSON parse error:", e);
+                }
+            }
+        };
+
+        xhr.onerror = function () {
+            console.error("Network error");
+            alert("Network error while loading storage");
+        };
+
+        xhr.send();
+
+    } catch (error) {
+        console.error("Storage load failed:", error);
+        alert("Failed to load storage information");
+    }
+}
+// initial load
+loadStorage();
+
+// auto refresh
+setInterval(loadStorage, 30000);
+</script>
+
+</body>
+</html>

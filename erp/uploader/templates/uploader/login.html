@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script>
+    // ================================================= Login and JWT ================
+    fetch("/api/login/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            username: "admin",
+            password: "1234"
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        localStorage.setItem("token", data.token);
+    });
+
+
+    const token = localStorage.getItem("token");
+
+    fetch("/api/files/", {
+        headers: {
+            "Authorization": "Bearer " + token
+        }
+    });
+</script>
+</body>
+</html>

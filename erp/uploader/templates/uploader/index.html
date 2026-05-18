@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>File Explorer</title>
+
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'uploader/css/style.css' %}">
+{#<script src="https://cdn.jsdelivr.net/npm/tus-js-client@2/dist/tus.min.js"></script>#}
+<script src="https://cdn.jsdelivr.net/npm/tus-js-client@latest/dist/tus.min.js"></script>
+</head>
+
+<body>
+
+<!-- LEFT TREE -->
+<div id="sidebar"></div>
+
+<!-- RIGHT PANEL -->
+<div id="main">
+
+
+        <div id="topBar" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <button id="backBtn" style="font-size:16px;" onclick="goBack()">⇦</button>
+                <div style="font-size:16px;" id="path">🏠 Root</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div id="actionButtons" style="display:none; gap:6px;">
+                    <button onclick="renameItem()" style="padding:6px; cursor:pointer;">✏ Rename</button>
+                    <button onclick="deleteItem()" style="padding:6px; cursor:pointer;">🗑 Delete</button>
+                </div>
+                <button onclick="openFolderModal()" style="padding:6px; cursor:pointer;">
+                    ➕ Folder
+                </button>
+                <button onclick="openUploadModal()" style="padding:6px; cursor:pointer;">
+                    <span style="font-size:16px;">⇧</span> Upload
+                </button>
+            </div>
+        </div>
+
+
+{#    <div id="topBar">#}
+{#        <button id="backBtn" style="font-size: 16px" onclick="goBack()">⇦</button>#}
+{#        <div style="font-size: 16px" id="path">🏠 Root</div>#}
+{#    </div>#}
+    <br/>
+    <!-- RIGHT + LEFT SPLIT AREA -->
+    <div style="display:flex; gap:20px;">
+        <!-- LEFT: VIEW -->
+        <div id="view" style="flex:1;"></div>
+        <!-- RIGHT: ACTION PANEL -->
+{#        <div style="width:180px;">#}
+{#            <div style="display:flex; gap:10px; margin-bottom:10px;">#}
+{#                <button onclick="openFolderModal()" style="flex:1; padding:6px; cursor:pointer;">#}
+{#                    ➕ Folder#}
+{#                </button>#}
+{#                <button onclick="openUploadModal()" style="flex:1; padding:6px; cursor:pointer;">#}
+{#                     <span style="font-size:16px;">⇧</span> Upload#}
+{#                </button>#}
+{#            </div>#}
+{#        </div>#}
+
+{#        <div style="width:180px;">#}
+{#            <div style="margin-bottom:10px;">#}
+{#                <button onclick="openFolderModal()" style="width:70%; padding:3px; cursor:pointer;">#}
+{#                    ➕ Create Folder#}
+{#                </button>#}
+{#            </div>#}
+{#        </div>#}
+    </div>
+</div>
+
+
+<!-- CREATE FOLDER MODAL -->
+<div id="folderModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); justify-content:center; align-items:center;">
+    <div style="background:#fff; padding:20px; border-radius:10px; width:300px; box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+        <h3 style="margin-top:0;">Create Folder</h3>
+        <input id="folderNameInput" type="text" placeholder="Folder name" style="width:100%; padding:8px; margin-bottom:15px; box-sizing:border-box;">
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+            <button onclick="closeFolderModal()" style="padding:6px 12px; background:#ccc; border:none; cursor:pointer;">Cancel</button>
+            <button onclick="saveFolder()" style="padding:6px 12px; background:#2d6cdf; color:white; border:none; cursor:pointer;">Save</button>
+        </div>
+    </div>
+</div>
+
+<div id="renameModal"
+     style="display:none; position:fixed; top:0; left:0;
+            width:100%; height:100%;
+            background:rgba(0,0,0,0.4);
+            justify-content:center; align-items:center;">
+
+    <div style="background:#fff; padding:20px; border-radius:10px; width:300px; box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+
+        <h3 style="margin-top:0;">Rename</h3>
+
+        <input id="renameInput"
+               type="text"
+               placeholder="Enter new name"
+               style="width:100%; padding:8px; margin-bottom:15px; box-sizing:border-box;">
+
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+
+            <button onclick="closeRenameModal()"
+                    style="padding:6px 12px; background:#ccc; border:none; cursor:pointer;">
+                Cancel
+            </button>
+
+            <button onclick="submitRename()"
+                    style="padding:6px 12px; background:#2d6cdf; color:white; border:none; cursor:pointer;">
+                Update
+            </button>
+
+        </div>
+
+    </div>
+</div>
+
+<div id="deleteModal"
+     style="display:none; position:fixed; top:0; left:0;
+            width:100%; height:100%;
+            background:rgba(0,0,0,0.4);
+            justify-content:center; align-items:center;">
+
+    <div style="background:#fff; padding:20px; border-radius:10px; width:320px; box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+
+        <h3 style="margin-top:0;">Confirm Delete</h3>
+
+        <p id="deleteText"></p>
+
+        <!-- 🔥 ERROR MESSAGE -->
+        <p id="deleteError"
+           style="color:red; font-size:13px; margin:5px 0; display:none;">
+           Delete reason is required
+        </p>
+
+        <textarea id="deleteReason"
+                  placeholder="Enter delete reason..."
+                  style="width:100%; height:70px; padding:8px; box-sizing:border-box; margin-bottom:10px;"></textarea>
+
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+
+            <button onclick="closeDeleteModal()"
+                    style="padding:6px 12px; background:#ccc; border:none; cursor:pointer;">
+                Cancel
+            </button>
+
+            <button onclick="confirmDelete()"
+                    style="padding:6px 12px; background:#d9534f; color:white; border:none; cursor:pointer;">
+                Delete
+            </button>
+
+        </div>
+
+    </div>
+</div>
+
+<div id="uploadModal"  class="modal">
+    <div class="modal-box">
+        <!-- HEADER -->
+        <div class="modal-header">
+            <span>📤 Upload Files</span>
+            <button onclick="closeUploadModal()">✖</button>
+        </div>
+        <!-- BODY -->
+        <div class="modal-body">
+            <!-- LEFT SIDE -->
+            <div class="left-panel">
+{#                <label class="file-drop">#}
+{#                    <input type="file" id="fileInput" multiple onchange="handleFileSelect(event)" hidden>#}
+{#                    <div>Click to Select Files</div>#}
+{#                </label>#}
+                <label class="file-drop" id="dropZone">
+                    <input type="file" id="fileInput" multiple onchange="handleFileSelect(event)" hidden>
+                    <div class="upload-content">
+                        <div class="upload-icon">⬆️</div>
+                        <div class="upload-text">Drag & Drop files here or Click</div>
+                    </div>
+                </label>
+                <!-- BUTTON BOTTOM LEFT left-bottom -->
+                <div class="center-upload-btn">
+                    <button class="add-btn" onclick="addFiles()">Choose Files</button>
+                </div>
+            </div>
+            <!-- RIGHT SIDE -->
+            <div class="right-panel">
+                <div id="fileList" class="file-list"></div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="modal-footer">
+            <button class="save-btn" onclick="startUpload()">Start Upload</button>
+        </div>
+    </div>
+</div>
+
+<div style="display: none" id="uploadModal" class="modal">
+
+    <div class="modal-box">
+
+        <!-- HEADER -->
+        <div class="modal-header">
+            <span>📤 Upload Files</span>
+            <button onclick="closeUploadModal()">✖</button>
+        </div>
+
+        <!-- BODY -->
+        <div class="modal-body">
+
+            <!-- LEFT PANEL -->
+            <div class="left-panel">
+                <label class="file-drop">
+                    <input type="file" id="fileInput" multiple hidden>
+                    <div>Click or Drop Files</div>
+                </label>
+
+                <button class="add-btn" onclick="addFiles()">+ Add Files</button>
+            </div>
+
+            <!-- RIGHT PANEL -->
+            <div class="right-panel">
+                <div id="fileList" class="file-list"></div>
+            </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="modal-footer">
+            <button class="save-btn" onclick="startUpload()">Start Upload</button>
+        </div>
+
+    </div>
+
+</div>
+
+<script src="{% static 'uploader/js/app.js' %}"></script>
+<script src="{% static 'uploader/js/upload.js' %}"></script>
+
+</body>
+</html>

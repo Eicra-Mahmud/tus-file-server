@@ -1,0 +1,551 @@
+body {
+    margin: 0;
+    font-family: Segoe UI, Arial;
+    display: flex;
+    height: 100vh;
+}
+
+/* ================= LEFT TREE ================= */
+#sidebar {
+    width: 260px;
+    background: #f3f3f3;
+    border-right: 1px solid #ddd;
+    padding: 10px;
+    overflow: auto;
+}
+
+.tree-folder {
+    padding: 6px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 13px;
+    user-select: none;
+}
+
+.tree-folder:hover {
+    background: #dbe9ff;
+}
+
+.tree-folder.active {
+    background: #cfe3ff;
+    font-weight: bold;
+}
+
+/* ================= RIGHT PANEL ================= */
+#main {
+    flex: 1;
+    padding: 15px;
+    overflow: auto;
+}
+
+/* PATH */
+#path {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 12px;
+}
+
+/* ================= FILE GRID ================= */
+/*#view {*/
+/*    display: flex;*/
+/*    flex-wrap: wrap;*/
+/*    gap: 18px;*/
+/*}*/
+
+
+/*#view {*/
+/*    display: flex;*/
+/*    flex-wrap: wrap;*/
+/*    gap: 10px;*/
+/*}*/
+
+.file-card {
+    width: 120px;
+    height: 100px;
+    border: 1px solid #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+#view {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+}
+
+/* ICON */
+.icon {
+    font-size: 100px;
+    margin-bottom: 6px;
+}
+
+.label {
+    font-size: 12px;
+    text-align: center;
+    word-break: break-word;
+}
+
+/* FOLDER */
+.folder {
+    width: 110px;
+    height: 95px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 6px;
+}
+
+.folder:hover {
+    background: #e6f0ff;
+}
+
+/* FILE */
+.file {
+    width: 110px;
+    height: 95px;
+    text-decoration: none;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 6px;
+}
+
+.file:hover {
+    background: #e6f0ff;
+}
+
+/* BACK BUTTON */
+#backBtn {
+    /*background: #8e8f92;*/
+    /*color: white;*/
+    border: none;
+    /*padding: 6px 12px;*/
+    /*border-radius: 6px;*/
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+#backBtn:hover {
+    background: #2d6cdf;
+}
+
+#topBar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ======= Upload ===========*/
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+}
+
+/* 🔥 BIGGER MODAL */
+.modal-box {
+    width: 900px;
+    height: 600px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* HEADER */
+.modal-header {
+    padding: 12px;
+    background: #2c3e50;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* BODY */
+.modal-body {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+}
+
+/* LEFT SIDE BIGGER */
+.left-panel {
+    width: 40%;
+    padding: 15px;
+    border-right: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+}
+
+/* FILE DROP AREA BIG */
+.file-drop {
+    flex: 1;
+    border: 2px dashed #bbb;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #777;
+    font-size: 16px;
+}
+
+/* BUTTON FIXED BOTTOM */
+.left-bottom {
+    margin-top: 10px;
+}
+
+.add-btn {
+    width: 100%;
+    padding: 10px;
+    background: #3498db;
+    border: none;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* RIGHT SIDE BIG + SCROLL */
+.right-panel {
+    width: 60%;
+    padding: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* FILE LIST SCROLL FIX */
+.file-list {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+/* FILE CARD */
+.file-item {
+    background: #f4f6f7;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    position: relative;
+}
+
+.file-name {
+    font-weight: bold;
+}
+
+.file-size {
+    font-size: 12px;
+    color: #666;
+}
+
+.remove-btn {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    border: none;
+    background: transparent;
+    color: red;
+    cursor: pointer;
+}
+
+/* PROGRESS */
+.progress-bar {
+    height: 6px;
+    background: #ddd;
+    margin-top: 6px;
+    border-radius: 5px;
+}
+
+.progress-fill {
+    height: 100%;
+    width: 0%;
+    background: #27ae60;
+}
+
+.status {
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+/* FOOTER */
+.modal-footer {
+    padding: 10px;
+    border-top: 1px solid #eee;
+    text-align: right;
+}
+
+.save-btn {
+    padding: 8px 16px;
+    background: #27ae60;
+    border: none;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.modal-header button {
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.modal-header button:hover {
+    transform: scale(1.1);
+    opacity: 0.8;
+}
+
+.file-drop {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 180px;
+    border: 2px dashed #999;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.3s;
+    background: #fafafa;
+}
+
+.file-drop:hover {
+    border-color: #007bff;
+    background: #f0f8ff;
+}
+
+.upload-content {
+    text-align: center;
+}
+
+.upload-icon {
+    font-size: 40px;
+    margin-bottom: 8px;
+    animation: bounce 1.5s infinite;
+}
+
+.upload-text {
+    font-size: 14px;
+    color: #555;
+}
+
+/* small animation */
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+
+
+.file-drop.dragover {
+    border-color: #007bff;
+    background: #eaf4ff;
+    transform: scale(1.01);
+}
+
+.file-drop {
+    transition: 0.2s;
+}
+
+.center-upload-btn {
+    width: 100%;
+    display: flex;
+    justify-content: center;   /* center horizontally */
+    margin-top: 15px;
+}
+
+.center-upload-btn button {
+    width: 20%;                /* 👈 your requirement */
+    min-width: 120px;          /* optional (prevents too small) */
+    padding: 8px;
+    cursor: pointer;
+    border: none;
+    background: #4CAF50;
+    color: white;
+    border-radius: 6px;
+    transition: 0.2s;
+}
+
+.center-upload-btn button:hover {
+    background: #45a049;
+}
+
+
+.active-item {
+    background: #d6e9ff;
+    border-radius: 6px;
+}
+
+.folder {
+    padding: 6px;
+    cursor: pointer;
+}
+
+.folder:hover {
+    background: #f0f0f0;
+}
+
+.active-item {
+    background: #d6e9ff;
+    border-radius: 6px;
+}
+
+
+#renameModal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/*.modal {*/
+/*    display: none;*/
+/*    position: fixed;*/
+/*    inset: 0;*/
+/*    background: rgba(0,0,0,0.5);*/
+/*}*/
+
+/*.modal-box {*/
+/*    width: 750px;*/
+/*    margin: 50px auto;*/
+/*    background: #fff;*/
+/*    border-radius: 10px;*/
+/*    overflow: hidden;*/
+/*    box-shadow: 0 10px 30px rgba(0,0,0,0.2);*/
+/*}*/
+
+/*!* HEADER *!*/
+/*.modal-header {*/
+/*    padding: 12px 15px;*/
+/*    background: #2c3e50;*/
+/*    color: #fff;*/
+/*    font-weight: bold;*/
+/*    display: flex;*/
+/*    justify-content: space-between;*/
+/*}*/
+
+/*!* BODY *!*/
+/*.modal-body {*/
+/*    display: flex;*/
+/*    height: 350px;*/
+/*}*/
+
+/*!* LEFT *!*/
+/*.left-panel {*/
+/*    width: 35%;*/
+/*    padding: 15px;*/
+/*    border-right: 1px solid #eee;*/
+/*    text-align: center;*/
+/*}*/
+
+/*.file-drop {*/
+/*    display: block;*/
+/*    border: 2px dashed #ccc;*/
+/*    padding: 30px 10px;*/
+/*    border-radius: 10px;*/
+/*    cursor: pointer;*/
+/*    color: #777;*/
+/*    margin-bottom: 15px;*/
+/*}*/
+
+/*.file-drop:hover {*/
+/*    border-color: #3498db;*/
+/*    color: #3498db;*/
+/*}*/
+
+/*.add-btn {*/
+/*    padding: 8px 15px;*/
+/*    border: none;*/
+/*    background: #3498db;*/
+/*    color: white;*/
+/*    border-radius: 5px;*/
+/*    cursor: pointer;*/
+/*}*/
+
+/*!* RIGHT *!*/
+/*.right-panel {*/
+/*    width: 65%;*/
+/*    padding: 10px;*/
+/*}*/
+
+/*.file-list {*/
+/*    height: 100%;*/
+/*    overflow-y: auto;   !* ✅ SCROLL HERE *!*/
+/*}*/
+
+/*!* FILE CARD *!*/
+/*.file-item {*/
+/*    background: #f8f9fa;*/
+/*    border-radius: 6px;*/
+/*    padding: 10px;*/
+/*    margin-bottom: 8px;*/
+/*    position: relative;*/
+/*}*/
+
+/*.file-name {*/
+/*    font-weight: 600;*/
+/*    font-size: 14px;*/
+/*}*/
+
+/*.file-size {*/
+/*    font-size: 12px;*/
+/*    color: #777;*/
+/*}*/
+
+/*!* REMOVE BTN *!*/
+/*.remove-btn {*/
+/*    position: absolute;*/
+/*    right: 8px;*/
+/*    top: 8px;*/
+/*    border: none;*/
+/*    background: transparent;*/
+/*    cursor: pointer;*/
+/*    color: red;*/
+/*}*/
+
+/*!* PROGRESS *!*/
+/*.progress-bar {*/
+/*    height: 6px;*/
+/*    background: #ddd;*/
+/*    margin-top: 6px;*/
+/*    border-radius: 5px;*/
+/*    overflow: hidden;*/
+/*}*/
+
+/*.progress-fill {*/
+/*    height: 100%;*/
+/*    width: 0%;*/
+/*    background: #27ae60;*/
+/*}*/
+
+/*!* STATUS *!*/
+/*.status {*/
+/*    font-size: 12px;*/
+/*    margin-top: 4px;*/
+/*    color: #555;*/
+/*}*/
+
+/*!* FOOTER *!*/
+/*.modal-footer {*/
+/*    padding: 10px;*/
+/*    text-align: right;*/
+/*    border-top: 1px solid #eee;*/
+/*}*/
+
+/*.save-btn {*/
+/*    padding: 8px 16px;*/
+/*    background: #27ae60;*/
+/*    border: none;*/
+/*    color: white;*/
+/*    border-radius: 5px;*/
+/*    cursor: pointer;*/
+/*}*/

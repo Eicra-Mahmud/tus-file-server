@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>File Explorer</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Segoe UI, Arial;
+    display: flex;
+    height: 100vh;
+}
+
+/* ================= LEFT TREE ================= */
+#sidebar {
+    width: 260px;
+    background: #f3f3f3;
+    border-right: 1px solid #ddd;
+    padding: 10px;
+    overflow: auto;
+}
+
+.tree-folder {
+    padding: 6px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 13px;
+    user-select: none;
+}
+
+.tree-folder:hover {
+    background: #dbe9ff;
+}
+
+.tree-folder.active {
+    background: #cfe3ff;
+    font-weight: bold;
+}
+
+/* ================= RIGHT PANEL ================= */
+#main {
+    flex: 1;
+    padding: 15px;
+    overflow: auto;
+}
+
+/* PATH */
+#path {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 25px;
+}
+
+/* ================= FILE GRID ================= */
+#view {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+}
+
+/* ICON */
+.icon {
+    font-size: 100px;
+    margin-bottom: 6px;
+}
+
+.label {
+    font-size: 12px;
+    text-align: center;
+    word-break: break-word;
+}
+
+/* FOLDER */
+.folder {
+    width: 110px;
+    height: 95px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 6px;
+}
+
+.folder:hover {
+    background: #e6f0ff;
+}
+
+/* FILE */
+.file {
+    width: 110px;
+    height: 95px;
+    text-decoration: none;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 6px;
+}
+
+.file:hover {
+    background: #e6f0ff;
+}
+
+/* BACK BUTTON */
+#backBtn {
+    background: #8e8f92;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+#backBtn:hover {
+    background: #2d6cdf;
+}
+</style>
+</head>
+
+<body>
+
+<!-- LEFT TREE -->
+<div id="sidebar"></div>
+
+<!-- RIGHT PANEL -->
+<div id="main">
+
+    <button id="backBtn" onclick="goBack()" style="display:none;">
+        ⬅ Back
+    </button>
+
+    <div id="path">🏠 Root</div>
+    <div id="view"></div>
+
+</div>
+
+<script>
+
+let TREE = {};
+let currentNode = {};
+let stack = [];
+let openNodes = {}; // for expand/collapse
+
+async function loadTree() {
+
+    const res = await fetch("http://192.168.1.52:8000/file-tree/");
+    TREE = await res.json();
+
+    currentNode = TREE;
+
+    renderSidebar();
+    renderMain();
+}
+
+/* ================= LEFT TREE ================= */
+function renderSidebar() {
+
+    let html = "";
+
+    function walk(node, depth = 0, path = []) {
+
+        for (let key in node) {
+
+            if (key === "files") continue;
+
+            let currentPath = [...path, key];
+            let pathKey = currentPath.join("/");
+
+            let isOpen = openNodes[pathKey];
+            let isActive = (pathKey === stack.join("/"));
+
+            html += `
+                <div
+                    class="tree-folder ${isActive ? 'active' : ''}"
+                    style="padding-left:${depth * 15}px"
+                    onclick="toggleFolder('${pathKey}')"
+                >
+                    ${isOpen ? "📂" : "📁"} ${key}
+                </div>
+            `;
+
+            if (isOpen) {
+                walk(node[key], depth + 1, currentPath);
+            }
+        }
+    }
+
+    walk(TREE);
+
+    document.getElementById("sidebar").innerHTML = html;
+}
+
+/* ================= TOGGLE + NAVIGATE ================= */
+function toggleFolder(pathKey) {
+
+    if (openNodes[pathKey]) {
+        delete openNodes[pathKey];
+    } else {
+        openNodes[pathKey] = true;
+    }
+
+    // NAVIGATE RIGHT PANEL
+    let parts = pathKey.split("/");
+
+    currentNode = TREE;
+    stack = [];
+
+    for (let p of parts) {
+        stack.push(p);
+        currentNode = currentNode[p];
+    }
+
+    renderSidebar();
+    renderMain();
+}
+
+/* ================= RIGHT PANEL ================= */
+function renderMain() {
+
+    let html = "";
+
+    document.getElementById("backBtn").style.display =
+        stack.length ? "inline-block" : "none";
+
+    // folders
+    for (let key in currentNode) {
+
+        if (key !== "files") {
+
+            html += `
+                <div class="folder" onclick="openFolder('${key}')">
+                    <div class="icon">📁</div>
+                    <div class="label">${key}</div>
+                </div>
+            `;
+        }
+    }
+
+    // files
+    if (currentNode.files && currentNode.files.length > 0) {
+
+        currentNode.files.forEach(file => {
+
+            const name = file?.name || file;
+            const id = file?.id;
+
+            const url = id
+                ? "http://103.204.82.239:1080/files/" + id
+                : "#";
+
+            html += `
+                <a href="${url}" target="_blank" class="file">
+                    <div class="icon">${getFileIcon(name)}</div>
+{#                    <div class="label">${name}</div>#}
+                   <div class="label" title="${name}"> ${shortName(name)} </div>
+                </a>
+            `;
+        });
+    }
+
+    document.getElementById("view").innerHTML = html;
+
+    document.getElementById("path").innerText =
+        "📂 /" + (stack.join("/") || "Root");
+}
+
+
+
+function shortName(name) {
+    if (!name) return "";
+
+    const max = 20;
+
+    if (name.length <= max) return name;
+
+    return name.substring(0, 12) + "...";
+}
+
+function getFileIcon(filename) {
+    if (!filename) return "📄";
+
+    const ext = filename.split('.').pop().toLowerCase();
+
+    const icons = {
+        // documents
+        pdf: "📕",
+        doc: "📄",
+        docx: "📄",
+        txt: "📝",
+
+        // excel
+        xls: "📊",
+        xlsx: "📊",
+        csv: "📑",
+
+        // images
+        jpg: "🖼️",
+        jpeg: "🖼️",
+        png: "🖼️",
+        gif: "🖼️",
+
+        // video
+        mp4: "🎬",
+        mkv: "🎬",
+        mov: "🎬",
+        avi: "🎬",
+        flv: "🎬",
+
+        // audio
+        mp3: "🎵",
+        wav: "🎵",
+
+        // archive
+        zip: "🗜️",
+        rar: "🗜️",
+        tar: "🗜️",
+        gz: "🗜️",
+    };
+
+    return icons[ext] || "📁";
+}
+
+
+/* ================= NAVIGATION ================= */
+function openFolder(name) {
+
+    stack.push(name);
+    currentNode = currentNode[name];
+
+    renderMain();
+    renderSidebar();
+}
+
+function goBack() {
+
+    stack.pop();
+
+    currentNode = TREE;
+
+    for (let p of stack) {
+        currentNode = currentNode[p];
+    }
+
+    renderMain();
+    renderSidebar();
+}
+
+loadTree();
+
+</script>
+
+</body>
+</html>
