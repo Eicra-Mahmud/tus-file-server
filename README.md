@@ -130,3 +130,131 @@ Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 - Always activate venv before running
 - Use separate ports for services
 
+
+
+# 🚀 Resumable Upload System Features
+
+## 📤 Core Upload Features
+- Single file upload
+- Multiple file upload
+- Drag & drop upload support
+- Folder upload support (optional)
+- Chunked upload (file split into parts)
+- Resumable upload (pause & resume anytime)
+
+---
+
+## ⏸️ Pause / Resume Features
+- Pause upload anytime
+- Resume upload from last uploaded chunk
+- Auto-resume after network failure
+- Manual resume button
+- Safe resume after page refresh or reload
+
+---
+
+## 🔄 Reliability & Recovery
+- Automatic retry failed chunks
+- Exponential backoff retry mechanism
+- Network interruption recovery
+- Upload session persistence
+- Resume upload using upload ID
+
+---
+
+## 📊 Progress Tracking
+- Upload progress percentage (%)
+- Uploaded size (MB/GB)
+- Remaining size display
+- Upload speed (KB/s, MB/s)
+- Estimated time remaining (ETA)
+- Per-file progress tracking (multi-upload)
+- Total batch progress
+
+---
+
+## 📁 Multiple File Management
+- Upload queue system
+- Parallel uploads (configurable concurrency)
+- Pause individual file upload
+- Resume individual file upload
+- Cancel single file upload
+- Cancel all uploads
+- Reorder upload queue
+
+---
+
+## 🧠 Session Management
+- Unique upload session ID per file
+- Resume using metadata
+- Persistent queue (localStorage / DB)
+- Server-side upload state tracking
+- Cleanup expired uploads automatically
+
+---
+
+## 🔐 Security & Validation
+- File size limit validation
+- File type restriction (MIME validation)
+- Token/JWT authentication support
+- Expiring upload links
+- Server-side chunk validation
+
+---
+
+## 🌐 Performance Optimization
+- Configurable chunk size (e.g., 5MB – 20MB)
+- Parallel chunk upload support
+- Adaptive upload speed handling
+- CDN support for upload endpoints
+
+---
+
+## 📡 Backend (TUS / Custom Server)
+- Upload creation endpoint
+- Chunk append endpoint
+- Upload offset tracking
+- Upload status API
+- Upload termination endpoint
+- Metadata storage (filename, size, type)
+
+---
+
+## 🧾 UI/UX Features
+- Progress bar (individual + total)
+- Pause / Resume buttons
+- Remaining size display
+- Upload speed indicator
+- Error display per file
+- Retry failed uploads button
+
+---
+
+## 🧹 Maintenance & Cleanup
+- Auto-delete incomplete uploads after timeout
+- Remove orphan upload sessions
+- Logging of completed uploads
+- Storage cleanup jobs
+
+
+# 📂 Folder View
+
+![Folder View](images/folder_view.jpeg)
+
+---
+
+# ⬆️ Upload Screen
+
+![Upload](images/upload.jpeg)
+
+---
+
+# 🗑️ Delete Action
+
+![Delete](images/delete.jpeg)
+
+---
+
+# ➕ Create New
+
+![Create](images/create.jpeg)
